@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from groq import Groq
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+import os
 
 # ------------------------
 # APP SETUP
@@ -22,8 +24,7 @@ app.add_middleware(
 )
 
 # 🔑 Groq Client
-import os
-client = Groq(api_key=os.getenv("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"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # 🧠 Temporary Memory (simple list)
 chat_history = []
@@ -59,3 +60,11 @@ def chat(req: ChatRequest):
     })
 
     return {"reply": reply}
+
+# ------------------------
+# SERVE FRONTEND (ADDED)
+# ------------------------
+
+@app.get("/")
+def serve_frontend():
+    return FileResponse("index.html")
