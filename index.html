@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GenAI Chatbot</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background-color: #343541;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 400px;
+            height: 600px;
+            background: #444654;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 75%;
+        }
+
+        .user {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .bot {
+            background-color: #3e3f4b;
+            color: white;
+            align-self: flex-start;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background: #40414f;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 10px;
+            background-color: #19c37d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #17a46b;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="input-area">
+        <input type="text" id="message" placeholder="Type your message">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+
+// ENTER key support
+document.getElementById("message").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        sendMessage();
+    }
+});
+
+async function sendMessage() {
+    let input = document.getElementById("message");
+    let message = input.value;
+
+    if (message.trim() === "") return;
+
+    let chatBox = document.getElementById("chat-box");
+
+    // USER MESSAGE
+    let userDiv = document.createElement("div");
+    userDiv.className = "message user";
+    userDiv.innerText = message;
+    chatBox.appendChild(userDiv);
+
+    input.value = "";
+
+    // BOT LOADING
+    let loadingDiv = document.createElement("div");
+    loadingDiv.className = "message bot";
+    loadingDiv.innerText = "Typing...";
+    chatBox.appendChild(loadingDiv);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        let res = await fetch("http://localhost:8000/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        });
+
+        if (!res.ok) {
+            throw new Error("Server error: " + res.status);
+        }
+
+        let data = await res.json();
+
+        // Replace loading with reply
+        loadingDiv.innerText = data.reply;
+
+    } catch (error) {
+        console.error(error);
+        loadingDiv.innerText = "Error connecting to server";
+    }
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>
