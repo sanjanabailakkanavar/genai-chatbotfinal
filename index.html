@@ -124,7 +124,7 @@ async function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        let res = await fetch("http://localhost:8000/chat", {
+        let res = await fetch("/chat", {   // ✅ FIXED LINE
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
